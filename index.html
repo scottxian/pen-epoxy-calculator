@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171717">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Epoxy Calc">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<title>Pen Epoxy Calculator</title>
+<style>
+:root{color-scheme:light dark;--bg:#f5f5f4;--card:#fff;--text:#171717;--muted:#666;--border:#d6d3d1;--accent:#222;--result:#eceae7}
+@media(prefers-color-scheme:dark){:root{--bg:#111;--card:#1c1c1c;--text:#f5f5f4;--muted:#aaa;--border:#444;--accent:#f5f5f4;--result:#262626}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:720px;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom))}
+h1{font-size:1.55rem;margin:0 0 5px}.sub{color:var(--muted);margin:0 0 18px;font-size:.95rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin:12px 0}
+h2{font-size:1.05rem;margin:0 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:.84rem;font-weight:600}select,input{width:100%;min-height:48px;margin-top:6px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font:inherit;font-size:16px;padding:10px}
+.result{background:var(--result);border-radius:16px;padding:18px;margin-top:14px}.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+.total{font-size:2.8rem;font-weight:800;line-height:1.05;margin:5px 0}.oz{color:var(--muted);font-size:1rem}
+.breakdown{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:17px}.metric small{display:block;color:var(--muted);margin-bottom:2px}.metric strong{font-size:1rem}
+.summary{font-size:.9rem;line-height:1.4;color:var(--muted);margin-top:14px}
+button{width:100%;min-height:48px;border:0;border-radius:11px;background:var(--accent);color:var(--bg);font-weight:700;font-size:16px;margin-top:12px}
+.note{font-size:.76rem;color:var(--muted);line-height:1.4;margin:14px 3px}
+@media(max-width:430px){.grid{grid-template-columns:1fr 1fr}.total{font-size:2.55rem}}
+</style>
+</head>
+<body><main>
+<h1>Pen Epoxy Calculator</h1>
+<p class="sub">Calculate resin volume after pen-tube displacement, with adjustable overage.</p>
+
+<section class="card">
+<h2>Mold cavity</h2>
+<p class="sub" style="margin-bottom:12px">Inside dimensions. Mold length is calculated from the tube length plus the extra plug space.</p>
+<div class="grid">
+<label>Width<select id="width"></select></label>
+<label>Depth<select id="depth"></select></label>
+<label>Number of molds<input id="qty" type="number" min="1" max="100" step="1" value="1"></label>
+<label>Extra mold length<select id="extraLength"></select></label>
+</div>
+</section>
+
+<section class="card">
+<h2>Pen tube</h2>
+<label>Tube / drill-bit size
+<select id="tubeDia">
+<option value="0">No tube / solid blank</option>
+<option value=".275" selected>7mm (.275")</option>
+<option value=".315">8mm (.315")</option>
+<option value=".311">Letter O (.311")</option>
+<option value=".354">9mm (.354")</option>
+<option value=".375">3/8" (.375")</option>
+<option value=".394">10mm (.394")</option>
+<option value=".413">10.5mm (.413")</option>
+<option value=".422">27/64" (.422")</option>
+<option value=".492">12.5mm (.492")</option>
+<option value=".469">15/32" (.469")</option>
+<option value=".484">31/64" (.484")</option>
+<option value=".516">33/64" (.516")</option>
+<option value=".551">14mm (.551")</option>
+<option value=".591">15mm (.591")</option>
+<option value=".578">37/64" (.578")</option>
+</select></label>
+<div class="grid" style="margin-top:12px">
+<label>Tube length<select id="tubeLength"></select></label>
+<label>Overage (%)<input id="overage" type="number" min="0" max="100" step="1" value="10"></label>
+</div>
+</section>
+
+<section class="result" aria-live="polite">
+<div class="eyebrow">TOTAL EPOXY TO MIX</div>
+<div class="total" id="totalMl">0 mL</div>
+<div class="oz" id="totalOz">0 fl oz</div>
+<div class="breakdown">
+<div class="metric"><small>Mold volume</small><strong id="rawMl">—</strong></div>
+<div class="metric"><small>Tube displacement</small><strong id="tubeMl">—</strong></div>
+<div class="metric"><small>Before overage</small><strong id="netMl">—</strong></div>
+<div class="metric"><small>Overage added</small><strong id="extraMl">—</strong></div>
+</div>
+<div class="summary" id="summary"></div>
+</section>
+
+<button id="reset" type="button">Reset defaults</button>
+<p class="note">Uses inside mold dimensions. One tube is assumed per mold. Tube displacement is subtracted as a solid cylinder, then the selected overage is added. Mold width, depth, tube length, and extra mold length use 1/32&quot; increments. Extra mold length defaults to 3/16&quot;. 1 in³ = 16.387064 mL.</p>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+function gcd(a,b){while(b){let t=b;b=a%b;a=t}return a}
+function frac(v){let n=Math.round(v*32),w=Math.floor(n/32),r=n%32;if(!r)return w+'″';let g=gcd(r,32);return(w?w+' ':'')+(r/g)+'/'+(32/g)+'″'}
+function fill(id,min,max,def){let s=$(id);s.innerHTML='';for(let i=Math.round(min*32);i<=Math.round(max*32);i++){let v=i/32,o=document.createElement('option');o.value=v;o.textContent=frac(v);if(Math.abs(v-def)<.001)o.selected=true;s.appendChild(o)}}
+function setup(){fill('width',.25,2,.875);fill('depth',.25,2,.875);fill('tubeLength',.5,5,2.25);fill('extraLength',1/32,1,3/16)}
+const n=id=>Math.max(0,Number($(id).value)||0);
+const fm=x=>x<10?x.toFixed(1):x.toFixed(0);
+function calc(){
+ let q=Math.max(1,Math.round(n('qty'))||1),w=n('width'),d=n('depth'),
+ dia=n('tubeDia'),tl=n('tubeLength'),extraLen=n('extraLength'),moldLen=tl+extraLen,ov=Math.min(100,n('overage'));
+ let raw=moldLen*w*d*16.387064*q;
+ let tube=Math.PI*Math.pow(dia/2,2)*tl*16.387064*q;
+ let net=Math.max(0,raw-tube),extra=net*ov/100,total=net+extra;
+ $('rawMl').textContent=fm(raw)+' mL'; $('tubeMl').textContent=fm(tube)+' mL';
+ $('netMl').textContent=fm(net)+' mL'; $('extraMl').textContent=fm(extra)+' mL';
+ $('totalMl').textContent=fm(total)+' mL'; $('totalOz').textContent=(total/29.5735).toFixed(2)+' fl oz';
+ let opt=$('tubeDia').options[$('tubeDia').selectedIndex].text;
+ $('summary').textContent=`${q} mold${q===1?'':'s'} at ${frac(w)} wide × ${frac(d)} deep × ${frac(moldLen)} effective length (${frac(tl)} tube + ${frac(extraLen)} extra). ${dia?`${opt} tube, one per mold.`:'Solid blank / no tube.'} ${ov}% overage included.`;
+}
+setup();
+['width','depth','qty','extraLength','tubeDia','tubeLength','overage'].forEach(x=>$(x).addEventListener('input',calc));
+$('reset').addEventListener('click',()=>{setup();$('tubeDia').value='.275';$('qty').value=1;$('overage').value=10;calc()});
+calc();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+})();
+</script></body></html>
