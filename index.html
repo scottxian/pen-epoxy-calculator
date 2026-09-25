@@ -27,6 +27,21 @@ button{width:100%;min-height:48px;border:0;border-radius:11px;background:var(--a
 .note{font-size:.76rem;color:var(--muted);line-height:1.4;margin:14px 3px}
 @media(max-width:430px){.grid{grid-template-columns:1fr 1fr}.total{font-size:2.55rem}}
 </style>
+
+<style>
+.pour-result{margin-top:18px;padding:20px;border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.14);box-shadow:0 12px 28px rgba(0,0,0,.18);text-align:left}
+.pour-label{font-size:.82rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;opacity:.72}
+.pour-total{font-size:2.8rem;line-height:1;font-weight:900;margin:5px 0 18px}
+.part-a-value{font-size:1.8rem;line-height:1.1;font-weight:850;margin:4px 0 18px}
+.calc-panel{border-top:1px solid rgba(255,255,255,.15);padding-top:16px;margin-top:4px}
+.calc-title{font-size:.86rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px}
+.calc-row{display:flex;justify-content:space-between;gap:16px;padding:3px 0;font-size:.94rem}
+.calc-row strong{white-space:nowrap}
+.specific-gravity{margin-top:11px;font-size:.94rem}
+.final-calc{margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.10);text-align:left}
+.final-calc-label{font-size:.78rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;opacity:.75;margin-bottom:4px}
+.final-calc-value{font-size:1.08rem;font-weight:800}
+</style>
 </head>
 <body><main>
 <h1>Pen Resin Calculator</h1>
@@ -72,16 +87,21 @@ button{width:100%;min-height:48px;border:0;border-radius:11px;background:var(--a
 
 <section class="result" aria-live="polite">
 <div class="eyebrow">TOTAL RESIN TO MIX</div>
-<div class="big" id="totalGrams">0 g</div>
-<div class="sub" id="mixSteps">Pour Part A to: 0 g • Then add Part B until scale reads: 0 g</div>
-<div class="total" id="totalMl"> 0 mL estimated volume</div>
-<div class="breakdown">
-<div class="metric"><small>Mold volume</small><strong id="rawMl">—</strong></div>
-<div class="metric"><small>Tube displacement</small><strong id="tubeMl">—</strong></div>
-<div class="metric"><small>Before overage</small><strong id="netMl">—</strong></div>
-<div class="metric"><small>Overage added</small><strong id="extraMl">—</strong></div>
+
+<div class="pour-result">
+ <div class="pour-label">Total Pour</div><div class="pour-total" id="totalGrams">0 g</div>
+ <div class="pour-label">Part A</div><div class="part-a-value" id="partAGrams">0 g</div>
+ <div class="calc-panel">
+  <div class="calc-title">Calculations</div>
+  <div class="calc-row"><span>Mold Volume</span><strong id="rawMl">0 mL</strong></div>
+  <div class="calc-row"><span>Tube Displacement</span><strong id="tubeMl">−0 mL</strong></div>
+  <div class="calc-row"><span>Resin Needed</span><strong id="netMl">0 mL</strong></div>
+  <div class="calc-row"><span id="overageLabel">10% Overage</span><strong id="extraMl">+0 mL</strong></div>
+  <div class="calc-row"><span>Final Volume</span><strong id="totalMl">0 mL</strong></div>
+  <div class="specific-gravity">Specific Gravity: <strong>1.04 g/mL</strong></div>
+  <div class="final-calc"><div class="final-calc-label">Final Calculation</div><div class="final-calc-value" id="finalCalculation">0 mL × 1.04 g/mL = 0 g</div></div>
+ </div>
 </div>
-<div class="summary" id="summary"></div>
 </section>
 
 <button id="reset" type="button">Reset defaults</button>
@@ -102,13 +122,16 @@ function calc(){
  let raw=moldLen*w*d*16.387064*q;
  let tube=Math.PI*Math.pow(dia/2,2)*tl*16.387064*q;
  let net=Math.max(0,raw-tube),extra=net*ov/100,total=net+extra,density=1.04,totalGrams=Math.round(total*density),partAGrams=totalGrams/2;
- $('rawMl').textContent=fm(raw)+' mL'; $('tubeMl').textContent=fm(tube)+' mL';
- $('netMl').textContent=fm(net)+' mL'; $('extraMl').textContent=fm(extra)+' mL';
- $('totalMl').textContent=fm(total)+' mL estimated volume';$('totalGrams').textContent=totalGrams+' g';$('mixSteps').textContent='Pour Part A to: '+partAGrams.toFixed(partAGrams%1?1:0)+' g • Then add Part B until scale reads: '+totalGrams+' g'; 
- let opt=$('tubeDia').options[$('tubeDia').selectedIndex].text;
- $('summary').textContent=`${q} mold${q===1?'':'s'} at ${frac(w)} wide × ${frac(d)} deep × ${frac(moldLen)} effective length (${frac(tl)} tube + ${frac(extraLen)} extra). ${dia?`${opt} tube, one per mold.`:'Solid blank / no tube.'} ${ov}% overage included.`;
+$('totalGrams').textContent=totalGrams+' g';
+$('partAGrams').textContent=partAGrams.toFixed(partAGrams%1?1:0)+' g';
+$('rawMl').textContent=fm(raw)+' mL';
+$('tubeMl').textContent='−'+fm(tube)+' mL';
+$('netMl').textContent=fm(net)+' mL';
+$('overageLabel').textContent=ov+'% Overage';
+$('extraMl').textContent='+'+fm(extra)+' mL';
+$('totalMl').textContent=fm(total)+' mL';
+$('finalCalculation').textContent=fm(total)+' mL × 1.04 g/mL = '+totalGrams+' g';
 }
-setup();
 ['width','depth','qty','extraLength','tubeDia','tubeLength','overage'].forEach(x=>$(x).addEventListener('input',calc));
 $('reset').addEventListener('click',()=>{setup();$('tubeDia').value='.275';$('qty').value=1;$('overage').value=10;calc()});
 calc();
