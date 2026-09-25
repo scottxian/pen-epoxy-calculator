@@ -29,18 +29,18 @@ button{width:100%;min-height:48px;border:0;border-radius:11px;background:var(--a
 </style>
 
 <style>
-.pour-result{margin-top:18px;padding:20px;border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.14);box-shadow:0 12px 28px rgba(0,0,0,.18);text-align:left}
-.pour-label{font-size:.82rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;opacity:.72}
-.pour-total{font-size:2.8rem;line-height:1;font-weight:900;margin:5px 0 18px}
-.part-a-value{font-size:1.8rem;line-height:1.1;font-weight:850;margin:4px 0 18px}
-.calc-panel{border-top:1px solid rgba(255,255,255,.15);padding-top:16px;margin-top:4px}
-.calc-title{font-size:.86rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px}
+.result{text-align:left}
+.result .eyebrow{font-size:.82rem;letter-spacing:.09em}
+.result .big{font-size:2.8rem;line-height:1;font-weight:900;margin:6px 0 18px}
+.part-a-label,.calc-title,.final-label{font-size:.78rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.part-a{font-size:1.8rem;font-weight:850;margin:4px 0 18px}
+.calc-box{border-top:1px solid rgba(255,255,255,.16);padding-top:15px}
+.calc-title{margin-bottom:8px}
 .calc-row{display:flex;justify-content:space-between;gap:16px;padding:3px 0;font-size:.94rem}
 .calc-row strong{white-space:nowrap}
-.specific-gravity{margin-top:11px;font-size:.94rem}
-.final-calc{margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.10);text-align:left}
-.final-calc-label{font-size:.78rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;opacity:.75;margin-bottom:4px}
-.final-calc-value{font-size:1.08rem;font-weight:800}
+.sg{margin-top:11px;font-size:.94rem}
+.final{border-top:1px solid rgba(255,255,255,.10);margin-top:13px;padding-top:11px}
+.final-value{font-size:1.08rem;font-weight:800;margin-top:4px}
 </style>
 </head>
 <body><main>
@@ -86,21 +86,20 @@ button{width:100%;min-height:48px;border:0;border-radius:11px;background:var(--a
 </section>
 
 <section class="result" aria-live="polite">
-<div class="eyebrow">TOTAL RESIN TO MIX</div>
-
-<div class="pour-result">
- <div class="pour-label">Total Pour</div><div class="pour-total" id="totalGrams">0 g</div>
- <div class="pour-label">Part A</div><div class="part-a-value" id="partAGrams">0 g</div>
- <div class="calc-panel">
-  <div class="calc-title">Calculations</div>
-  <div class="calc-row"><span>Mold Volume</span><strong id="rawMl">0 mL</strong></div>
-  <div class="calc-row"><span>Tube Displacement</span><strong id="tubeMl">−0 mL</strong></div>
-  <div class="calc-row"><span>Resin Needed</span><strong id="netMl">0 mL</strong></div>
-  <div class="calc-row"><span id="overageLabel">10% Overage</span><strong id="extraMl">+0 mL</strong></div>
-  <div class="calc-row"><span>Final Volume</span><strong id="totalMl">0 mL</strong></div>
-  <div class="specific-gravity">Specific Gravity: <strong>1.04 g/mL</strong></div>
-  <div class="final-calc"><div class="final-calc-label">Final Calculation</div><div class="final-calc-value" id="finalCalculation">0 mL × 1.04 g/mL = 0 g</div></div>
- </div>
+<div class="eyebrow">TOTAL POUR</div>
+<div class="big" id="totalGrams">0 g</div>
+<div class="part-a-label">PART A</div>
+<div class="part-a" id="partAGrams">0 g</div>
+<div class="calc-box">
+<div class="calc-title">CALCULATIONS</div>
+<div class="calc-row"><span>Mold Volume</span><strong id="rawMl">—</strong></div>
+<div class="calc-row"><span>Tube Displacement</span><strong id="tubeMl">—</strong></div>
+<div class="calc-row"><span>Resin Needed</span><strong id="netMl">—</strong></div>
+<div class="calc-row"><span id="overageLabel">10% Overage</span><strong id="extraMl">—</strong></div>
+<div class="calc-row"><span>Final Volume</span><strong id="totalMl">—</strong></div>
+<div class="sg">Specific Gravity: <strong>1.04 g/mL</strong></div>
+<div class="final"><div class="final-label">FINAL CALCULATION</div>
+<div class="final-value" id="finalCalculation">—</div></div>
 </div>
 </section>
 
@@ -122,16 +121,17 @@ function calc(){
  let raw=moldLen*w*d*16.387064*q;
  let tube=Math.PI*Math.pow(dia/2,2)*tl*16.387064*q;
  let net=Math.max(0,raw-tube),extra=net*ov/100,total=net+extra,density=1.04,totalGrams=Math.round(total*density),partAGrams=totalGrams/2;
-$('totalGrams').textContent=totalGrams+' g';
-$('partAGrams').textContent=partAGrams.toFixed(partAGrams%1?1:0)+' g';
-$('rawMl').textContent=fm(raw)+' mL';
-$('tubeMl').textContent='−'+fm(tube)+' mL';
-$('netMl').textContent=fm(net)+' mL';
-$('overageLabel').textContent=ov+'% Overage';
-$('extraMl').textContent='+'+fm(extra)+' mL';
-$('totalMl').textContent=fm(total)+' mL';
-$('finalCalculation').textContent=fm(total)+' mL × 1.04 g/mL = '+totalGrams+' g';
+ $('rawMl').textContent=fm(raw)+' mL';
+ $('tubeMl').textContent='−'+fm(tube)+' mL';
+ $('netMl').textContent=fm(net)+' mL';
+ $('extraMl').textContent='+'+fm(extra)+' mL';
+ $('overageLabel').textContent=ov+'% Overage';
+ $('totalMl').textContent=fm(total)+' mL';
+ $('totalGrams').textContent=totalGrams+' g';
+ $('partAGrams').textContent=partAGrams.toFixed(partAGrams%1?1:0)+' g';
+ $('finalCalculation').textContent=fm(total)+' mL × 1.04 g/mL = '+totalGrams+' g';
 }
+setup();
 ['width','depth','qty','extraLength','tubeDia','tubeLength','overage'].forEach(x=>$(x).addEventListener('input',calc));
 $('reset').addEventListener('click',()=>{setup();$('tubeDia').value='.275';$('qty').value=1;$('overage').value=10;calc()});
 calc();
